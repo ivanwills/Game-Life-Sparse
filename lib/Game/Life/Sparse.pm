@@ -1,40 +1,82 @@
 package Game::Life::Sparse;
 
-# Created on: 2014-05-09 18:11:07
+# Created on: 2014-05-09 18:20:54
 # Create by:  Ivan Wills
 # $Id$
 # $Revision$, $HeadURL$, $Date$
 # $Revision$, $Source$, $Date$
 
-use strict;
-use warnings;
+use Moose;
+use namespace::autoclean;
 use version;
 use Carp;
 use Scalar::Util;
-use List::Util;
+use List::Util qw/reduce/;
 #use List::MoreUtils;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
-use base qw/Exporter/;
 
+our $VERSION = version->new('0.0.1');
 
-our $VERSION     = version->new('0.0.1');
-our @EXPORT_OK   = qw//;
-our %EXPORT_TAGS = ();
-#our @EXPORT      = qw//;
+has dimentions => (
+    is       => 'ro',
+    isa      => 'Int',
+    required => 1,
+);
+has initial_length => (
+    is       => 'ro',
+    isa      => 'Int',
+    default  => 10,
+    required => 1,
+);
+has cells => (
+    is       => 'ro',
+    isa      => 'Int',
+    default  => 10,
+    required => 1,
+);
+has board => (
+    is       => 'rw',
+    isa      => 'HashRef[Bool]',
+    builder  => '_board',
+    required => 1,
+);
 
-sub new {
-	my $caller = shift;
-	my $class  = ref $caller ? ref $caller : $caller;
-	my %param  = @_;
-	my $self   = \%param;
+sub volume {
+    my ($self) = @_;
+    my @max;
+    for my $cell (keys %{ $self->board }) {
+        my @points = split /,/, @{$cell};
+        warn Dumper \@points;
+        for my $i (0 .. $#points) {
+            $points[$i] = $cell->[$i] if $points[$i] > $cell->[$i];
+        }
+    }
+    warn Dumper \@max;
 
-	bless $self, $class;
-
-	return $self;
+    return reduce {$a * $b} @max;
 }
 
+sub _board {
+    my ($self) = @_;
+    my $board = {};
 
+    warn Dumper $self;
+    warn $self->cells;
+    warn $self->initial_length;
+    for (1 .. $self->cells) {
+        my @pos;
+        for (0 .. $self->dimentions) {
+            push @pos, rand $self->initial_length;
+        }
+        $self->board->{ join ',', @pos } = 1;
+    }
+    warn Dumper $board;
+
+    return $board;
+}
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -80,15 +122,6 @@ form "An object of this class represents ...") to give the reader a high-level
 context to help them understand the methods that are subsequently described.
 
 
-=head3 C<new ( $search, )>
-
-Param: C<$search> - type (detail) - description
-
-Return: Game::Life::Sparse -
-
-Description:
-
-=cut
 
 
 =head1 DIAGNOSTICS
