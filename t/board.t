@@ -11,7 +11,7 @@ subtest board_creation => \&board_creation;
 done_testing;
 
 sub board_creation {
-    plan tests => 5;
+    plan tests => 3;
 
     my $board = Game::Life::Sparse->new({
         dimentions     => 2,
@@ -19,22 +19,22 @@ sub board_creation {
         cells          => 20,
     });
 
-    is 100, $board->volume, "Board is created with correct volume";
+    is $board->size, 20, "Board is created with correct size";
 
     $board = Game::Life::Sparse->new(
         dimentions     => 3,
         initial_length => 10,
-        cells          => 20,
+        cells          => 200,
     );
 
-    is 1000, $board->volume, "Board is created with correct volume";
+    is $board->size, 200, "Board is created with correct size";
 
     $board = Game::Life::Sparse->new(
         dimentions     => 4,
         initial_length => 10,
-        cells          => 20,
+        cells          => 2000,
     );
 
-    is 10000, $board->volume, "Board is created with correct volume";
+    is $board->size, 2000, "Board is created with correct size";
 }
 

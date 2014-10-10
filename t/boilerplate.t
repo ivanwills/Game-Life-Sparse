@@ -50,5 +50,5 @@ TODO: {
     );
 }
 
-module_boilerplate_ok('Game-Life-Sparse/t/boilerplate.t');
+module_boilerplate_ok('lib/Game/Life/Sparse.pm');
 

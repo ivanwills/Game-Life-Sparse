@@ -10,9 +10,7 @@ use Moose;
 use namespace::autoclean;
 use version;
 use Carp;
-use Scalar::Util;
 use List::Util qw/reduce/;
-#use List::MoreUtils;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
 
@@ -36,44 +34,121 @@ has cells => (
     required => 1,
 );
 has board => (
-    is       => 'rw',
-    isa      => 'HashRef[Bool]',
-    builder  => '_board',
-    required => 1,
+    is         => 'rw',
+    isa        => 'HashRef[Bool]',
+    builder    => '_board',
+    required   => 1,
+    lazy_build => 1,
 );
+
+sub init {
+    my ($self, $board) = @_;
+    my $new_board = {};
+    for my $i ( 0 .. @{$board} - 1 ) {
+        my $row = $board->[$i];
+        my @cells = split //, $row;
+        for my $j ( 0 .. @cells - 1 ) {
+            next if $cells[$j] eq ' ';
+            $new_board->{"$i,$j"} = 1;
+        }
+    }
+
+    $self->board($new_board);
+
+    return $self;
+}
 
 sub volume {
     my ($self) = @_;
     my @max;
     for my $cell (keys %{ $self->board }) {
-        my @points = split /,/, @{$cell};
-        warn Dumper \@points;
+        my @points = split /,/, $cell;
         for my $i (0 .. $#points) {
-            $points[$i] = $cell->[$i] if $points[$i] > $cell->[$i];
+            $max[$i] = $points[$i] if !$max[$i] || $points[$i] > $max[$i];
         }
     }
-    warn Dumper \@max;
 
     return reduce {$a * $b} @max;
+}
+
+sub is_alive {
+    my ($self, $cell) = @_;
+
+    return !!$self->board->{ join ',', @$cell };
+}
+
+sub next_state {
+    my ($self, $cell) = @_;
+
+    my $neighbours = $self->neighbours($cell);
+    my $count = reduce {$a + $b} map {$_ ? 1 : 0} @$neighbours;
+
+    if ( $self->is_alive($cell) ) {
+        return $count == 2 || $count == 3;
+    }
+
+    return $count == 2;
+}
+
+sub neighbours {
+    my ($self, $cell) = @_;
+    my $offsets = [];
+    for (1 .. $self->dimentions) {
+        $offsets = _expander($offsets);
+    }
+    my @neighbours;
+    for my $offset (@{$offsets}) {
+        # skip the 0 offset position
+        next if !reduce {$a + $b} map {abs $_} @$offset;
+        push @neighbours, $self->board->{ join ',', @{ _array_sum($cell, $offset) } };
+    }
+
+    return \@neighbours;
+}
+
+sub size {
+    my ($self) = @_;
+    return scalar keys %{$self->board};
 }
 
 sub _board {
     my ($self) = @_;
     my $board = {};
 
-    warn Dumper $self;
-    warn $self->cells;
-    warn $self->initial_length;
-    for (1 .. $self->cells) {
+    while (keys %{$board} < $self->cells) {
         my @pos;
-        for (0 .. $self->dimentions) {
-            push @pos, rand $self->initial_length;
+        while (@pos < $self->dimentions) {
+            push @pos, int rand $self->initial_length;
         }
-        $self->board->{ join ',', @pos } = 1;
+        $board->{ join ',', @pos } = 1;
     }
-    warn Dumper $board;
 
     return $board;
+}
+
+sub _expander {
+    my ($array) = @_;
+    $array ||= [];
+    my $dims = @$array ? @$array : 1;
+    my @new;
+
+    for my $offset (-1,0,1) {
+        for my $dim (0 .. $dims -1) {
+            push @new, [ @{ $array->[$dim] || [] }, $offset ];
+        }
+    }
+
+    return \@new;
+}
+
+sub _array_sum {
+    my ($array1, $array2) = @_;
+    my @new;
+    for my $i ( 0 .. $#$array1 ) {
+        $new[$i] = $array1->[$i] + $array2->[$i];
+    }
+
+    return \@new;
 }
 
 __PACKAGE__->meta->make_immutable;
