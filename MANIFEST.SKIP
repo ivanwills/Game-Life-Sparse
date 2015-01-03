@@ -59,5 +59,22 @@ Debian_CPANTS.txt
 # Avoid Devel::NYTProf generated files
 \bnytprof*
 
+# Avoid vim temporary file and other vim generated files
+.*\.sw[ponxmn]$
+.vimtagsdisplay
+tags
+
 # Avoid archives of this distribution
 \bGame-Life-Sparse-[\d\.\_]+
+
+# Avoid prove saved state file
+.prove
+
+# Other files of interest
+\..*\.tag$
+errors.err
+.travis.yml
+vim.sh
+tmp*
+temp/*
+^MYMETA\.json$
