@@ -1,8 +1,10 @@
+package ReturnValue;
+
 use strict;
 use warnings;
 use Module::Build;
 
-my $builder = Module::Build->new(
+my %config = (
     module_name       => 'Game::Life::Sparse',
     license           => 'perl',
     dist_author       => 'Ivan Wills <ivan.wills@gmail.com>',
@@ -33,4 +35,13 @@ my $builder = Module::Build->new(
     },
 );
 
-$builder->create_build_script();
+sub config { %config };
+
+do_it() unless caller;
+
+sub do_it {
+    my $builder = Module::Build->new(%config);
+    $builder->create_build_script();
+}
+
+1;
