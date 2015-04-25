@@ -21,7 +21,7 @@ my %config = (
         'version'                  => 0,
     },
     build_requires => {
-        'Test::More'       => 0,
+        'Test::More'       => '0.88',
         'Test::NoWarnings' => 0,
     },
     add_to_cleanup     => [ 'Game-Life-Sparse-*' ],
