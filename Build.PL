@@ -14,7 +14,6 @@ my %config = (
         'List::Util'               => 0,
         'Moose'                    => 0,
         'namespace::autoclean'     => 0,
-        'Path::Class'              => 0,
         'Scalar::Util'             => 0,
         'Test::Class::Moose'       => 0,
         'Test::Class::Moose::Load' => 0,
